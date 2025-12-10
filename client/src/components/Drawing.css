@@ -1,0 +1,33 @@
+/* src/components/Drawing.css */
+canvas {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: crosshair;
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  width: min(92vw, 960px);
+  height: 60vh;
+  max-height: 640px;
+}
+
+.controls {
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.controls label {
+  margin-right: 6px;
+  font-weight: 600;
+}
+
+.controls input[type="color"] {
+  margin-right: 6px;
+  width: 46px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  padding: 0;
+}

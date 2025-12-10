@@ -1,0 +1,113 @@
+/* General App Styles */
+body {
+  font-family: 'Saira', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: radial-gradient(circle at 15% 20%, #1e1f3b, #0f101d 40%), linear-gradient(135deg, #101727, #0b0f1a);
+  color: #f6f8fb;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+.App {
+  text-align: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.App-header {
+  padding: 18px 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.App-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: 0.5px;
+}
+
+.connection {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.connection.connected {
+  background: rgba(46, 204, 113, 0.15);
+  color: #7ee0a3;
+  border-color: rgba(126, 224, 163, 0.35);
+}
+
+.connection.disconnected {
+  background: rgba(231, 76, 60, 0.15);
+  color: #f59f9f;
+  border-color: rgba(245, 159, 159, 0.35);
+}
+
+main.content {
+  padding: 28px 0 0;
+}
+
+.game-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+
+/* Lobby Styles */
+.lobby h1 {
+  margin-top: 0;
+  font-size: 1.8rem;
+  letter-spacing: 0.4px;
+}
+
+.lobby button {
+  font-size: 1.15rem;
+  padding: 12px 18px;
+  margin: 12px;
+  cursor: pointer;
+  border-radius: 12px;
+  border: 1px solid rgba(97, 218, 251, 0.5);
+  background: linear-gradient(135deg, rgba(97, 218, 251, 0.18), rgba(102, 126, 234, 0.2));
+  color: #e9f8ff;
+  transition: transform 0.15s ease, box-shadow 0.2s ease;
+  min-width: 180px;
+}
+
+.lobby button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* General Button Styles */
+button {
+  font-size: 1rem;
+  padding: 10px 14px;
+  margin: 6px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6f8fb;
+  transition: background-color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+}
+
+button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0);
+}

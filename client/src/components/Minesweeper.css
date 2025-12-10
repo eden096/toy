@@ -1,0 +1,40 @@
+/* src/components/Minesweeper.css */
+.board {
+  --cell-size: min(44px, calc(78vw / 10));
+  display: grid;
+  grid-template-columns: repeat(10, var(--cell-size));
+  grid-template-rows: repeat(10, var(--cell-size));
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: fit-content;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  background-color: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+  color: #f6f8fb;
+}
+
+.cell.revealed {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+.cell.mine {
+  background-color: rgba(231, 76, 60, 0.4);
+}
+
+.status-bar {
+  display: flex;
+  gap: 12px;
+  margin: 8px 0 12px;
+  font-weight: bold;
+  justify-content: center;
+}

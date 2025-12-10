@@ -1,0 +1,44 @@
+/* src/components/TicTacToe.css */
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin: 12px 0 18px;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.square {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  float: left;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  height: 70px;
+  width: 70px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  color: #f6f8fb;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.square:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.square:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(97, 218, 251, 0.4);
+}
+
+.board-row {
+  display: flex;
+  justify-content: center;
+}
