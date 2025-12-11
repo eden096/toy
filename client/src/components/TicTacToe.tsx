@@ -1,5 +1,5 @@
 // src/components/TicTacToe.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import './TicTacToe.css';
 
@@ -8,70 +8,76 @@ interface TicTacToeProps {
   onBackToLobby: () => void;
 }
 
+type Symbol = 'X' | 'O';
+
+interface UpdatePayload {
+  board: Array<string | null>;
+  isXNext: boolean;
+  winner?: string | null;
+}
+
 const TicTacToe: React.FC<TicTacToeProps> = ({ socket, onBackToLobby }) => {
   const [board, setBoard] = useState<Array<string | null>>(Array(9).fill(null));
   const [isXNext, setIsXNext] = useState(true);
   const [roomCode, setRoomCode] = useState<string>('');
   const [inputCode, setInputCode] = useState<string>('');
-  const [symbol, setSymbol] = useState<'X' | 'O' | null>(null);
-  const [status, setStatus] = useState<string>('방을 만들거나 코드로 입장하세요.');
+  const [symbol, setSymbol] = useState<Symbol | null>(null);
+  const [status, setStatus] = useState<string>('Create a room or join with a 5-digit code.');
   const [playerCount, setPlayerCount] = useState<number>(1);
 
   const handleClick = (index: number) => {
     if (!roomCode) return;
-    if (calculateWinner(board) || board[index]) {
-      return;
-    }
+    if (calculateWinner(board) || board[index]) return;
     socket.emit('tictactoe:move', { index });
   };
 
   useEffect(() => {
-    socket.on('tictactoe:roomCreated', ({ code, symbol, board, isXNext }) => {
+    const onRoomCreated = ({ code, symbol, board, isXNext }: { code: string; symbol: Symbol; board: Array<string | null>; isXNext: boolean }) => {
       setRoomCode(code);
       setSymbol(symbol);
       setBoard(board);
       setIsXNext(isXNext);
-      setStatus(`방 생성 완료! 코드: ${code} (당신은 ${symbol})`);
-    });
+      setStatus(`Room created! Code: ${code} (You are ${symbol})`);
+    };
 
-    socket.on('tictactoe:joined', ({ code, symbol, board, isXNext }) => {
+    const onJoined = ({ code, symbol, board, isXNext }: { code: string; symbol: Symbol; board: Array<string | null>; isXNext: boolean }) => {
       setRoomCode(code);
       setSymbol(symbol);
       setBoard(board);
       setIsXNext(isXNext);
-      setStatus(`방 ${code} 입장 완료! 당신은 ${symbol}`);
-    });
+      setStatus(`Joined room ${code}. You are ${symbol}.`);
+    };
 
-    socket.on('tictactoe:update', ({ board, isXNext, winner }) => {
+    const onUpdate = ({ board, isXNext, winner }: UpdatePayload) => {
       setBoard(board);
       setIsXNext(isXNext);
       if (winner) {
-        setStatus(`승자: ${winner}`);
+        setStatus(`Winner: ${winner}`);
       } else {
-        setStatus(`다음 차례: ${isXNext ? 'X' : 'O'}`);
+        setStatus(`Next: ${isXNext ? 'X' : 'O'}`);
       }
-    });
+    };
 
-    socket.on('tictactoe:error', ({ message }) => {
-      setStatus(message);
-    });
+    const onError = ({ message }: { message: string }) => setStatus(message);
 
-    socket.on('tictactoe:playerCount', (count: number) => {
-      setPlayerCount(count);
-    });
+    const onPlayerCount = (count: number) => setPlayerCount(count);
+
+    socket.on('tictactoe:roomCreated', onRoomCreated);
+    socket.on('tictactoe:joined', onJoined);
+    socket.on('tictactoe:update', onUpdate);
+    socket.on('tictactoe:error', onError);
+    socket.on('tictactoe:playerCount', onPlayerCount);
 
     return () => {
-      socket.off('tictactoe:roomCreated');
-      socket.off('tictactoe:joined');
-      socket.off('tictactoe:update');
-      socket.off('tictactoe:error');
-      socket.off('tictactoe:playerCount');
+      socket.off('tictactoe:roomCreated', onRoomCreated);
+      socket.off('tictactoe:joined', onJoined);
+      socket.off('tictactoe:update', onUpdate);
+      socket.off('tictactoe:error', onError);
+      socket.off('tictactoe:playerCount', onPlayerCount);
     };
   }, [socket]);
 
-  const handleCreateRoom = () => {
-    socket.emit('tictactoe:createRoom');
-  };
+  const handleCreateRoom = () => socket.emit('tictactoe:createRoom');
 
   const handleJoinRoom = () => {
     const trimmed = inputCode.trim();
@@ -79,15 +85,12 @@ const TicTacToe: React.FC<TicTacToeProps> = ({ socket, onBackToLobby }) => {
     socket.emit('tictactoe:joinRoom', { code: trimmed });
   };
 
-  const renderSquare = (index: number) => {
-    return (
-      <button className="square" onClick={() => handleClick(index)}>
-        {board[index]}
-      </button>
-    );
-  };
+  const renderSquare = (index: number) => (
+    <button className="square" onClick={() => handleClick(index)}>
+      {board[index]}
+    </button>
+  );
 
-  const winner = calculateWinner(board);
   const handleReset = () => {
     if (!roomCode) return;
     socket.emit('tictactoe:reset');
@@ -97,23 +100,23 @@ const TicTacToe: React.FC<TicTacToeProps> = ({ socket, onBackToLobby }) => {
     <div>
       <button onClick={onBackToLobby}>Back to Lobby</button>
       <div className="room-controls">
-        <button onClick={handleCreateRoom}>방 만들기</button>
+        <button onClick={handleCreateRoom}>Create Room</button>
         <div className="join-box">
           <input
             type="text"
-            placeholder="5자리 코드"
+            placeholder="Enter 5-digit code"
             value={inputCode}
             onChange={(e) => setInputCode(e.target.value)}
             maxLength={5}
           />
-          <button onClick={handleJoinRoom}>방 입장</button>
+          <button onClick={handleJoinRoom}>Join Room</button>
         </div>
       </div>
       <button onClick={handleReset} disabled={!roomCode}>Reset Game</button>
       <h2>Tic-Tac-Toe Game</h2>
       <div className="status">
         <div>{status}</div>
-        {roomCode && <div>방 코드: {roomCode} | 플레이어: {playerCount}/2 | 당신: {symbol ?? '-'}</div>}
+        {roomCode && <div>Room: {roomCode} | Players: {playerCount}/2 | You: {symbol ?? '-'}</div>}
       </div>
       <div className="board-row">
         {renderSquare(0)}
