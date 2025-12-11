@@ -21,8 +21,8 @@ const io = new Server(server, {
 });
 
 // --- Tic-Tac-Toe Game State ---
-let tictactoe_board = Array(9).fill(null);
-let tictactoe_isXNext = true;
+const rooms = new Map(); // code -> { board, isXNext, players: Map<socketId, { symbol }> }
+const socketToRoom = new Map(); // socketId -> code
 
 const calculateWinner = (squares) => {
   const lines = [
@@ -37,7 +37,31 @@ const calculateWinner = (squares) => {
     }
   }
   return null;
-}
+};
+
+const generateRoomCode = () => {
+  let code = "";
+  do {
+    code = Math.floor(10000 + Math.random() * 90000).toString(); // 5-digit
+  } while (rooms.has(code));
+  return code;
+};
+
+const leaveRoom = (socket) => {
+  const code = socketToRoom.get(socket.id);
+  if (!code) return;
+  const room = rooms.get(code);
+  if (room) {
+    room.players.delete(socket.id);
+    if (room.players.size === 0) {
+      rooms.delete(code);
+    } else {
+      io.to(code).emit("tictactoe:playerCount", room.players.size);
+    }
+  }
+  socket.leave(code);
+  socketToRoom.delete(socket.id);
+};
 
 // --- Minesweeper Game State ---
 const MS_ROWS = 10;
@@ -96,19 +120,61 @@ function revealMinesweeperCell(board, row, col) {
 io.on('connection', (socket) => {
   console.log('a user connected:', socket.id);
   
-  // --- Tic-Tac-Toe Events ---
-  socket.emit('tictactoe:update', tictactoe_board);
-  socket.on('tictactoe:move', ({ index }) => {
-    if (calculateWinner(tictactoe_board) || tictactoe_board[index]) return;
-    const player = tictactoe_isXNext ? 'X' : 'O';
-    tictactoe_board[index] = player;
-    tictactoe_isXNext = !tictactoe_isXNext;
-    io.emit('tictactoe:update', tictactoe_board);
+  // --- Tic-Tac-Toe Roomed Events ---
+  socket.on('tictactoe:createRoom', () => {
+    const code = generateRoomCode();
+    const room = { board: Array(9).fill(null), isXNext: true, players: new Map() };
+    room.players.set(socket.id, { symbol: 'X' });
+    rooms.set(code, room);
+    socketToRoom.set(socket.id, code);
+    socket.join(code);
+    socket.emit('tictactoe:roomCreated', { code, symbol: 'X', board: room.board, isXNext: room.isXNext });
+    io.to(code).emit('tictactoe:playerCount', room.players.size);
   });
+
+  socket.on('tictactoe:joinRoom', ({ code }) => {
+    const room = rooms.get(code);
+    if (!room) {
+      socket.emit('tictactoe:error', { message: 'Room not found' });
+      return;
+    }
+    if (room.players.size >= 2 && !room.players.has(socket.id)) {
+      socket.emit('tictactoe:error', { message: 'Room is full' });
+      return;
+    }
+    const existingSymbol = room.players.get(socket.id)?.symbol;
+    const symbol = existingSymbol || (room.players.size === 0 ? 'X' : 'O');
+    room.players.set(socket.id, { symbol });
+    socketToRoom.set(socket.id, code);
+    socket.join(code);
+    socket.emit('tictactoe:joined', { code, symbol, board: room.board, isXNext: room.isXNext });
+    io.to(code).emit('tictactoe:playerCount', room.players.size);
+  });
+
+  socket.on('tictactoe:move', ({ index }) => {
+    const code = socketToRoom.get(socket.id);
+    if (!code || index === undefined) return;
+    const room = rooms.get(code);
+    if (!room) return;
+    const player = room.players.get(socket.id);
+    if (!player) return;
+    const currentTurn = room.isXNext ? 'X' : 'O';
+    if (player.symbol !== currentTurn) return;
+    if (calculateWinner(room.board) || room.board[index]) return;
+
+    room.board[index] = player.symbol;
+    room.isXNext = !room.isXNext;
+    io.to(code).emit('tictactoe:update', { board: room.board, isXNext: room.isXNext, winner: calculateWinner(room.board) });
+  });
+
   socket.on('tictactoe:reset', () => {
-    tictactoe_board = Array(9).fill(null);
-    tictactoe_isXNext = true;
-    io.emit('tictactoe:update', tictactoe_board);
+    const code = socketToRoom.get(socket.id);
+    if (!code) return;
+    const room = rooms.get(code);
+    if (!room) return;
+    room.board = Array(9).fill(null);
+    room.isXNext = true;
+    io.to(code).emit('tictactoe:update', { board: room.board, isXNext: room.isXNext, winner: null });
   });
 
   // --- Minesweeper Events ---
@@ -150,6 +216,7 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log('user disconnected:', socket.id);
+    leaveRoom(socket);
   });
 });
 

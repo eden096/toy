@@ -42,3 +42,30 @@
   display: flex;
   justify-content: center;
 }
+
+.room-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.join-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.join-box input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f6f8fb;
+  width: 120px;
+}
+
+.join-box input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
