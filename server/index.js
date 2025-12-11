@@ -134,13 +134,15 @@ io.on('connection', (socket) => {
 
   // --- Drawing Events ---
   socket.on('drawing:start', (data) => {
-    socket.broadcast.emit('drawing:start', data);
+    const payload = { ...data, userId: socket.id };
+    socket.broadcast.emit('drawing:start', payload);
   });
   socket.on('drawing:draw', (data) => {
-    socket.broadcast.emit('drawing:draw', data);
+    const payload = { ...data, userId: socket.id };
+    socket.broadcast.emit('drawing:draw', payload);
   });
   socket.on('drawing:stop', () => {
-    socket.broadcast.emit('drawing:stop');
+    socket.broadcast.emit('drawing:stop', { userId: socket.id });
   });
   socket.on('drawing:clear', () => {
     io.emit('drawing:clear'); // Use io.emit to clear for everyone, including sender
