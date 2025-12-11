@@ -8,7 +8,7 @@ interface TicTacToeProps {
   onBackToLobby: () => void;
 }
 
-type Symbol = 'X' | 'O';
+type PlayerSymbol = 'X' | 'O';
 
 interface UpdatePayload {
   board: Array<string | null>;
@@ -21,7 +21,7 @@ const TicTacToe: React.FC<TicTacToeProps> = ({ socket, onBackToLobby }) => {
   const [isXNext, setIsXNext] = useState(true);
   const [roomCode, setRoomCode] = useState<string>('');
   const [inputCode, setInputCode] = useState<string>('');
-  const [symbol, setSymbol] = useState<Symbol | null>(null);
+  const [symbol, setSymbol] = useState<PlayerSymbol | null>(null);
   const [status, setStatus] = useState<string>('Create a room or join with a 5-digit code.');
   const [playerCount, setPlayerCount] = useState<number>(1);
 
@@ -32,7 +32,7 @@ const TicTacToe: React.FC<TicTacToeProps> = ({ socket, onBackToLobby }) => {
   };
 
   useEffect(() => {
-    const onRoomCreated = ({ code, symbol, board, isXNext }: { code: string; symbol: Symbol; board: Array<string | null>; isXNext: boolean }) => {
+    const onRoomCreated = ({ code, symbol, board, isXNext }: { code: string; symbol: PlayerSymbol; board: Array<string | null>; isXNext: boolean }) => {
       setRoomCode(code);
       setSymbol(symbol);
       setBoard(board);
@@ -40,7 +40,7 @@ const TicTacToe: React.FC<TicTacToeProps> = ({ socket, onBackToLobby }) => {
       setStatus(`Room created! Code: ${code} (You are ${symbol})`);
     };
 
-    const onJoined = ({ code, symbol, board, isXNext }: { code: string; symbol: Symbol; board: Array<string | null>; isXNext: boolean }) => {
+    const onJoined = ({ code, symbol, board, isXNext }: { code: string; symbol: PlayerSymbol; board: Array<string | null>; isXNext: boolean }) => {
       setRoomCode(code);
       setSymbol(symbol);
       setBoard(board);
